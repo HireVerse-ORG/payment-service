@@ -8,8 +8,8 @@ export enum SubscriptionPlan {
 
 @Entity('seeker_subscription_plan')
 export class SeekerSubscriptionPlan {
-    @PrimaryGeneratedColumn()
-    id!: number;
+    @PrimaryGeneratedColumn('uuid')  
+    id!: string;
 
     @Column({
         type: 'varchar',
@@ -26,10 +26,9 @@ export class SeekerSubscriptionPlan {
 
     @Column({
         type: 'varchar',
-        length: 255,
-        unique: true,
+        nullable: true,
     })
-    stripeCustomerId!: string;  
+    paymentIdentifier?: string | null; 
 
     @Column({
         type: 'int',
