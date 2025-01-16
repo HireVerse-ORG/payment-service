@@ -25,15 +25,15 @@ class Server {
 
     start(PORT: string) {
         this.server = this.app.listen(PORT, () => {
-            logger.info(`User server running at PORT:${PORT}`);
+            logger.info(`Payment server running at PORT:${PORT}`);
         });
     }
 
     async stop() {
-        logger.info("Shutting down User Server...");
+        logger.info("Shutting down Payment Server...");
         try {
             this.server?.close(() => {
-                logger.info("User Server shut down gracefully.");
+                logger.info("Payment Server shut down gracefully.");
             });
 
             process.exit(0);

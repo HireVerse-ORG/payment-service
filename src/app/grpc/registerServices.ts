@@ -1,14 +1,14 @@
 import * as grpc from '@grpc/grpc-js';
-// import { logger } from '../../core/utils/logger';
-// import { companyProfileService, seekerProfileService } from './services';
+import { seekerPaymentService } from './services';
+import { logger } from '../../core/utils/logger';
 
 const registerServices = (server: grpc.Server) => {
-    // const services = [seekerProfileService, companyProfileService]
+    const services = [seekerPaymentService]
 
-    // services.forEach(({ name, serviceDefinition, implementation }) => {
-    //     server.addService(serviceDefinition, implementation);
-    //     logger.info(`Service registered: ${name}`);
-    // });
+    services.forEach(({ name, serviceDefinition, implementation }) => {
+        server.addService(serviceDefinition, implementation);
+        logger.info(`Service registered: ${name}`);
+    });
 };
 
 export default registerServices

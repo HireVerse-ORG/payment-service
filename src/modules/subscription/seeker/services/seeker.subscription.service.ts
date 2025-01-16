@@ -1,25 +1,31 @@
 import { inject, injectable } from "inversify";
-import { ISeekerSubscriptionService } from "./interfaces/seeker.subscription.service.interface";
-import containerTypes from "../../../core/container/container.types";
-import { ISeekerSubscriptionRepository } from "./interfaces/seeker.subscription.repository.interface";
-import { SubscriptionPlan, SeekerSubscriptionPlan } from "./seeker.subscription.entity";
+import { ISeekerSubscriptionService } from "../interfaces/seeker.subscription.service.interface";
+import containerTypes from "../../../../core/container/container.types";
+import { ISeekerSubscriptionRepository } from "../interfaces/seeker.subscription.repository.interface";
+import { SubscriptionPlan, SeekerSubscriptionPlan } from "../models/seeker.subscription.entity";
 import { BadRequestError, NotFoundError } from "@hireverse/service-common/dist/app.errors";
-import { SeekerSubscriptionPlanDTO } from "../dto/seeker.subscription.dto";
+import { SeekerSubscriptionPlanDTO } from "../../dto/seeker.subscription.dto";
+import { ISeekerSubscriptionUsageService } from "../interfaces/seeker.subscription.usage.service.interface";
 
 @injectable()
 export class SeekerSubscriptionService implements ISeekerSubscriptionService {
-    @inject(containerTypes.SeekerSubscriptionRepository) repo!: ISeekerSubscriptionRepository;
+    @inject(containerTypes.SeekerSubscriptionRepository) private repo!: ISeekerSubscriptionRepository;
+    @inject(containerTypes.SeekerSubscriptionUsageService) private usageService!: ISeekerSubscriptionUsageService;
+
 
     // Create a new subscription
     async createSubscription(userId: string, plan: SubscriptionPlan, paymentIdentifier?: string): Promise<SeekerSubscriptionPlanDTO> {
         const { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers } = this.generatePlanDetails(plan);
-        const subscription = await this.repo.create({ userId, plan, paymentIdentifier, jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers });
+        const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers });
+        await this.usageService.createUsage(userId);
         return this.toDTO(subscription);
     }
 
     // Get a subscription by user ID
     async getSubscriptionByUserId(userId: string): Promise<SeekerSubscriptionPlanDTO | null> {
-        const subscription = await this.repo.findOne({ where: { userId } });
+        const subscription = await this.repo.findOne({
+            where: { userId },
+          });
         return subscription ? this.toDTO(subscription) : null;
     }
 
@@ -55,13 +61,13 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             jobApplicationsPerMonth,
             canMessageAllSeekers,
             canMessageOnlySeekers,
-            paymentIdentifier: null,
         });
 
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to cancel subscription`);
         }
 
+        await this.usageService.resetUsage(userId);
         return true;
     }
 
@@ -93,6 +99,9 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         if (!renewedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
         }
+
+        await this.usageService.resetUsage(userId);
+
         return this.toDTO(renewedSubscription);
     }
 

@@ -6,7 +6,7 @@ export enum SubscriptionPlan {
     PREMIUM = 'premium',
 }
 
-@Entity('seeker_subscription_plan')
+@Entity('seeker_subscription_plans')
 export class SeekerSubscriptionPlan {
     @PrimaryGeneratedColumn('uuid')  
     id!: string;
@@ -46,5 +46,5 @@ export class SeekerSubscriptionPlan {
         type: 'boolean',
         default: false,
     })
-    canMessageOnlySeekers!: boolean;  
+    canMessageOnlySeekers!: boolean; 
 }

@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from "../seeker/seeker.subscription.entity";
+import { SubscriptionPlan } from "../seeker/models/seeker.subscription.entity";
 
 export interface SeekerSubscriptionPlanDTO {
     id: string;  

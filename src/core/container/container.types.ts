@@ -9,11 +9,21 @@ export default  {
     SeekerSubscriptionService: Symbol('SeekerSubscriptionService'),
     SeekerSubscriptionRepository: Symbol('SeekerSubscriptionRepository'),
 
+    SeekerSubscriptionUsageController: Symbol('SeekerSubscriptionUsageController'),
+    SeekerSubscriptionUsageGrpcController: Symbol('SeekerSubscriptionUsageGrpcController'),
+    SeekerSubscriptionUsageService: Symbol('SeekerSubscriptionUsageService'),
+    SeekerSubscriptionUsageRepository: Symbol('SeekerSubscriptionUsageRepository'),
+
     // company
     CompanySubscriptionController: Symbol('CompanySubscriptionController'),
     CompanySubscriptionGrpcController: Symbol('CompanySubscriptionGrpcController'),
     CompanySubscriptionService: Symbol('CompanySubscriptionService'),
     CompanySubscriptionRepository: Symbol('CompanyProfileRepository'),
     
-    // external
+    // Payment
+    PaymentAdapter: Symbol('PaymentAdapter'),
+    PaymentService: Symbol('PaymentService'),
+
+    // webhook
+    WebhookController: Symbol('WebhookController'),
 };

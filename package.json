@@ -4,14 +4,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "stripe:listen": "stripe listen --forward-to http://localhost:5005/webhook"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@hireverse/service-common": "^1.0.7",
+    "@hireverse/service-common": "^1.0.8",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

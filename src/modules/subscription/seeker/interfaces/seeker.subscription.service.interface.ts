@@ -1,5 +1,5 @@
 import { SeekerSubscriptionPlanDTO } from "../../dto/seeker.subscription.dto";
-import { SubscriptionPlan } from "../seeker.subscription.entity";
+import { SubscriptionPlan } from "../models/seeker.subscription.entity";
 
 export interface ISeekerSubscriptionService {
     createSubscription(userId: string, plan: SubscriptionPlan, paymentIdentifier?: string): Promise<SeekerSubscriptionPlanDTO>;
