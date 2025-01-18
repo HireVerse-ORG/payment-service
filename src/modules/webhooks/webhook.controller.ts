@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { ISeekerSubscriptionService } from "../subscription/seeker/interfaces/seeker.subscription.service.interface";
 import containerTypes from "../../core/container/container.types";
+import { ICompanySubscriptionService } from "../subscription/company/interfaces/company.subscription.service.interface";
 
 @injectable()
 export class WebhookController {
     @inject(containerTypes.SeekerSubscriptionService) private seekerSubscriptionService!: ISeekerSubscriptionService;
+    @inject(containerTypes.CompanySubscriptionService) private companySubscriptionService!: ICompanySubscriptionService;
 
     stripe = async (request: Request, response: Response) => {
         const event = request.body;
@@ -22,6 +24,14 @@ export class WebhookController {
                             // console.log(error);
                         }
                     }
+
+                    if (userId && plan_type === "company") {
+                        try {
+                            await this.companySubscriptionService.updateSubscriptionPlan(userId, selected_plan);
+                        } catch (error) {
+                            // console.log(error);
+                        }
+                    }
                     break;
 
                 case 'customer.subscription.updated':
@@ -31,6 +41,14 @@ export class WebhookController {
                     if (updatedUserId && updatedPlanType === 'seeker') {
                         try {
                             await this.seekerSubscriptionService.renewSubscription(updatedUserId);
+                        } catch (error) {
+                            // console.error("Error updating subscription data:", error);
+                        }
+                    }
+
+                    if (updatedUserId && updatedPlanType === 'company') {
+                        try {
+                            await this.companySubscriptionService.renewSubscription(updatedUserId);
                         } catch (error) {
                             // console.error("Error updating subscription data:", error);
                         }

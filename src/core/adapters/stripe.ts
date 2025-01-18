@@ -6,6 +6,7 @@ import { InternalError } from "@hireverse/service-common/dist/app.errors";
 import { logger } from "../utils/logger";
 import { CreateCustomerDTO, CreatePaymentLinkDTO, CreatePlanDTO, SubscribeToPlanDTO } from "./dto/adapter.dto";
 import { SubscriptionPlan } from "../../modules/subscription/seeker/models/seeker.subscription.entity";
+import { CompanySubscriptionPlans } from "../../modules/subscription/company/models/company.subscription.entity";
 
 checkEnvVariables("STRIPE_API_KEY");
 
@@ -15,6 +16,12 @@ export const STRIPE_SEEKER_SUBSCRIPTION_IDS = {
     [SubscriptionPlan.FREE]: "price_1QhVWuRFZZ0zOK4co7hJQF9o",
     [SubscriptionPlan.BASIC]: "price_1QhUgURFZZ0zOK4cX57dKXCn",
     [SubscriptionPlan.PREMIUM]: "price_1QhVJwRFZZ0zOK4cqrzCNcbd",
+};
+
+export const STRIPE_COMPANY_SUBSCRIPTION_IDS = {
+    [CompanySubscriptionPlans.FREE]: "price_1QhVWuRFZZ0zOK4co7hJQF9o",
+    [CompanySubscriptionPlans.BASIC]: "price_1QiC7NRFZZ0zOK4csrYjI14d",
+    [CompanySubscriptionPlans.PREMIUM]: "price_1QiC8RRFZZ0zOK4cPH5R1HXQ",
 };
 
 @injectable()

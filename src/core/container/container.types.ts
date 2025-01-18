@@ -19,6 +19,11 @@ export default  {
     CompanySubscriptionGrpcController: Symbol('CompanySubscriptionGrpcController'),
     CompanySubscriptionService: Symbol('CompanySubscriptionService'),
     CompanySubscriptionRepository: Symbol('CompanyProfileRepository'),
+
+    CompanySubscriptionUsageController: Symbol('CompanySubscriptionUsageController'),
+    CompanySubscriptionUsageGrpcController: Symbol('CompanySubscriptionUsageGrpcController'),
+    CompanySubscriptionUsageService: Symbol('CompanySubscriptionUsageService'),
+    CompanySubscriptionUsageRepository: Symbol('CompanySubscriptionUsageRepository'),
     
     // Payment
     PaymentAdapter: Symbol('PaymentAdapter'),

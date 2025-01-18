@@ -1,23 +1,24 @@
 import { inject, injectable } from "inversify";
 import containerTypes from "../../../../core/container/container.types";
-import { ISeekerSubscriptionService } from "../interfaces/seeker.subscription.service.interface";
-import asyncWrapper from "@hireverse/service-common/dist/utils/asyncWrapper";
-import { AuthRequest } from '@hireverse/service-common/dist/token/user/userRequest';
-import { Response } from "express";
-import { ISeekerSubscriptionUsageService } from "../interfaces/seeker.subscription.usage.service.interface";
+import { ICompanySubscriptionService } from "../interfaces/company.subscription.service.interface";
+import { BaseController } from "../../../../core/base.controller";
+import { ICompanySubscriptionUsageService } from "../interfaces/company.subscription.usage.service.interface";
 import { IPaymentService } from "../../../payment/interface/payment.service.interface";
-import { SubscriptionPlan } from "../models/seeker.subscription.entity";
-import { STRIPE_SEEKER_SUBSCRIPTION_IDS } from "../../../../core/adapters/stripe";
+import asyncWrapper from "@hireverse/service-common/dist/utils/asyncWrapper";
+import { AuthRequest } from "@hireverse/service-common/dist/token/user/userRequest";
+import { Response } from "express";
+import { CompanySubscriptionPlans } from "../models/company.subscription.entity";
+import { STRIPE_COMPANY_SUBSCRIPTION_IDS } from "../../../../core/adapters/stripe";
 
 @injectable()
-export class SeekerSubscriptionController {
-    @inject(containerTypes.SeekerSubscriptionService) private subscriptionService!: ISeekerSubscriptionService;
-    @inject(containerTypes.SeekerSubscriptionUsageService) private usageService!: ISeekerSubscriptionUsageService;
+export class CompanySubscriptionController extends BaseController {
+    @inject(containerTypes.CompanySubscriptionService) subscriptionService!: ICompanySubscriptionService;
+    @inject(containerTypes.CompanySubscriptionUsageService) private usageService!: ICompanySubscriptionUsageService;
     @inject(containerTypes.PaymentService) private paymentService!: IPaymentService;
 
     /**
-   * @route GET /api/payment/subscription/seeker/plan
-   * @scope Seeker
+   * @route GET /api/payment/subscription/company/plan
+   * @scope Company
    **/
     public getSubscriptionPlan = asyncWrapper(async (req: AuthRequest, res: Response) => {
         const userId = req.payload?.userId!;
@@ -30,8 +31,8 @@ export class SeekerSubscriptionController {
     })
 
     /**
-   * @route GET /api/payment/subscription/seeker/usage
-   * @scope Seeker
+   * @route GET /api/payment/subscription/company/usage
+   * @scope Company
    **/
     public getSubscriptionPlanUsage = asyncWrapper(async (req: AuthRequest, res: Response) => {
         const userId = req.payload?.userId!;
@@ -42,19 +43,20 @@ export class SeekerSubscriptionController {
 
         return res.json(usage);
     })
+
     /**
-     * @route POST /api/payment/subscription/seeker/paymentlink
-     * @scope Seeker
+     * @route POST /api/payment/subscription/company/paymentlink
+     * @scope Company
      **/
     public getPaymentlink = asyncWrapper(async (req: AuthRequest, res: Response) => {
         const userId = req.payload?.userId!;
         const { plan, successUrl, cancelUrl } = req.body;
 
-        let validPlan: SubscriptionPlan;
+        let validPlan: CompanySubscriptionPlans;
         if (plan === "basic") {
-            validPlan = SubscriptionPlan.BASIC;
+            validPlan = CompanySubscriptionPlans.BASIC;
         } else if (plan === "premium") {
-            validPlan = SubscriptionPlan.PREMIUM;
+            validPlan = CompanySubscriptionPlans.PREMIUM;
         } else {
             return res.status(400).json({ message: "Invalid subscription plan." });
         }
@@ -73,17 +75,18 @@ export class SeekerSubscriptionController {
 
         const url = await this.paymentService.generatePaymentLink({
             customerId,
-            priceId: STRIPE_SEEKER_SUBSCRIPTION_IDS[validPlan],
+            priceId: STRIPE_COMPANY_SUBSCRIPTION_IDS[validPlan],
             successUrl,
             cancelUrl,
             metadata: {
                 userId,
-                plan_type: "seeker",
+                plan_type: "company",
                 selected_plan: plan
             },
         });
 
         return res.json({ url, expires_in: "24 hours" });
+
     });
 
     /**
@@ -101,9 +104,8 @@ export class SeekerSubscriptionController {
 
         const customerId = subscription.paymentIdentifier;
 
-        await this.paymentService.subscribeToPlan(customerId, STRIPE_SEEKER_SUBSCRIPTION_IDS[SubscriptionPlan.FREE]);
+        await this.paymentService.subscribeToPlan(customerId, STRIPE_COMPANY_SUBSCRIPTION_IDS[CompanySubscriptionPlans.FREE]);
         await this.subscriptionService.cancelSubscription(userId)
         return res.json({ message: "Subscription Cancelled" })
     });
-
 }

@@ -1,15 +1,23 @@
 import { Container } from "inversify";
-import { SeekerSubscriptionController } from "./company.subscription.controller";
 import TYPES from "../../../core/container/container.types";
-import { ISeekerSubscriptionService } from "./interfaces/company.subscription.service.interface";
-import { SeekerSubscriptionService } from "./company.subscription.service";
-import { ISeekerSubscriptionRepository } from "./interfaces/company.subscription.repository.interface";
-import { SeekerSubscriptionRepository } from "./company.subscription.repository";
+import { CompanySubscriptionController } from "./controllers/company.subscription.controller";
+import { ICompanySubscriptionService } from "./interfaces/company.subscription.service.interface";
+import { CompanySubscriptionService } from "./services/company.subscription.service";
+import { ICompanySubscriptionRepository } from "./interfaces/company.subscription.repository.interface";
+import { CompanySubscriptionRepository } from "./repository/company.subscription.repository";
+import { ICompanySubscriptionUsageService } from "./interfaces/company.subscription.usage.service.interface";
+import { CompanySubscriptionUsageService } from "./services/company.subscription.usage.service";
+import { ICompanySubscriptionUsageRepository } from "./interfaces/company.subscription.usage.repository.interface";
+import { CompanySubscriptionUsageRepository } from "./repository/company.subscription.usage.repository";
+import { CompanySubscriptionGrpcController } from "./controllers/company.subscription.grpc.controller";
 
-const loadSeekerSubscriptionContainer = (container: Container) => {
-    container.bind<SeekerSubscriptionController>(TYPES.SeekerSubscriptionController).to(SeekerSubscriptionController);
-    container.bind<ISeekerSubscriptionService>(TYPES.SeekerSubscriptionService).to(SeekerSubscriptionService);
-    container.bind<ISeekerSubscriptionRepository>(TYPES.SeekerSubscriptionRepository).to(SeekerSubscriptionRepository);
+const loadCompanySubscriptionContainer = (container: Container) => {
+    container.bind<CompanySubscriptionController>(TYPES.CompanySubscriptionController).to(CompanySubscriptionController);
+    container.bind<CompanySubscriptionGrpcController>(TYPES.CompanySubscriptionGrpcController).to(CompanySubscriptionGrpcController);
+    container.bind<ICompanySubscriptionService>(TYPES.CompanySubscriptionService).to(CompanySubscriptionService);
+    container.bind<ICompanySubscriptionRepository>(TYPES.CompanySubscriptionRepository).to(CompanySubscriptionRepository);
+    container.bind<ICompanySubscriptionUsageService>(TYPES.CompanySubscriptionUsageService).to(CompanySubscriptionUsageService);
+    container.bind<ICompanySubscriptionUsageRepository>(TYPES.CompanySubscriptionUsageRepository).to(CompanySubscriptionUsageRepository);
 };
 
-export {loadSeekerSubscriptionContainer}
+export {loadCompanySubscriptionContainer}

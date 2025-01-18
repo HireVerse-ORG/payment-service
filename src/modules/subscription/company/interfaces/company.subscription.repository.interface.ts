@@ -1,4 +1,4 @@
 import { IPostgresRepository } from "@hireverse/service-common/dist/repository";
-import { SeekerSubscriptionPlan } from "../company.subscription.entity";
+import { CompanySubscriptionPlan } from "../models/company.subscription.entity";
 
-export interface ISeekerSubscriptionRepository extends IPostgresRepository<SeekerSubscriptionPlan> {}
+export interface ICompanySubscriptionRepository extends IPostgresRepository<CompanySubscriptionPlan> {}
