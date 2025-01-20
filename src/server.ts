@@ -6,9 +6,10 @@ import ExpressServer from './app/express';
 import GrpcServer from './app/grpc';
 import { checkEnvVariables } from '@hireverse/service-common/dist/utils';
 import Database from './core/database';
+import { startEventService, stopEventService } from './event';
 
 (async () => {
-    checkEnvVariables('DATABASE_URL');
+    checkEnvVariables('DATABASE_URL', 'KAFKA_SERVER');
     const expressPort = process.env.EXPRESS_PORT || '5005';
     const grpcPort = process.env.GRPC_PORT || '6005';
 
@@ -19,15 +20,18 @@ import Database from './core/database';
     db.connect(); 
     expressServer.start(expressPort);
     grpcServer.start(grpcPort);
+    startEventService();
 
     process.on('SIGINT', async () => {
         expressServer.stop();
         grpcServer.close();
         db.disconnect();
+        stopEventService();
     });
     process.on("SIGTERM", () => {
         expressServer.stop();
         grpcServer.close();
         db.disconnect();
+        stopEventService();
     });
 })();

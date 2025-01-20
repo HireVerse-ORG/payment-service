@@ -4,6 +4,8 @@ import { ICompanySubscriptionUsageService } from "../interfaces/company.subscrip
 import { ICompanySubscriptionUsageRepository } from "../interfaces/company.subscription.usage.repository.interface";
 import { CompanySubscriptionUsage } from "../models/company.subscription.usage.entity";
 import { BadRequestError, NotFoundError } from "@hireverse/service-common/dist/app.errors";
+import { UpdateCompanySubscriptionUsageDTO } from "../../dto/company.subscription.dto";
+import { ICompanySubscriptionService } from "../interfaces/company.subscription.service.interface";
 
 @injectable()
 export class CompanySubscriptionUsageService implements ICompanySubscriptionUsageService {
@@ -42,5 +44,15 @@ export class CompanySubscriptionUsageService implements ICompanySubscriptionUsag
         }
 
         return resetedUsage;
+    }
+
+    async updateUsage(id: string, data: UpdateCompanySubscriptionUsageDTO): Promise<CompanySubscriptionUsage> {
+        console.log({id});
+        console.log({data});
+        const updatedUsage = await this.repo.update(id, data);
+        if (!updatedUsage) {
+            throw new BadRequestError("Failed to update subscription usage");
+        }
+        return updatedUsage;
     }
 }

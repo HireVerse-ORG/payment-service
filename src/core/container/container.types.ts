@@ -2,7 +2,7 @@
  * InversifyJS need to use the type as identifiers at runtime.
  * We use symbols as identifiers but you can also use classes and or string literals.
  */
-export default  {
+export default {
     // seeker
     SeekerSubscriptionController: Symbol('SeekerSubscriptionController'),
     SeekerSubscriptionGrpcController: Symbol('SeekerSubscriptionGrpcController'),
@@ -24,11 +24,17 @@ export default  {
     CompanySubscriptionUsageGrpcController: Symbol('CompanySubscriptionUsageGrpcController'),
     CompanySubscriptionUsageService: Symbol('CompanySubscriptionUsageService'),
     CompanySubscriptionUsageRepository: Symbol('CompanySubscriptionUsageRepository'),
-    
+
     // Payment
     PaymentAdapter: Symbol('PaymentAdapter'),
     PaymentService: Symbol('PaymentService'),
 
     // webhook
     WebhookController: Symbol('WebhookController'),
+
+    // kafka
+    KafkaProducer: Symbol('KafkaProducer'),
+    KafkaConsumer: Symbol('KafkaConsumer'),
+    EventController: Symbol('EventController'),
+    EventService: Symbol('EventService'),
 };
