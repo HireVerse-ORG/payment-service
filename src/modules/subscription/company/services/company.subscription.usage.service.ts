@@ -47,8 +47,6 @@ export class CompanySubscriptionUsageService implements ICompanySubscriptionUsag
     }
 
     async updateUsage(id: string, data: UpdateCompanySubscriptionUsageDTO): Promise<CompanySubscriptionUsage> {
-        console.log({id});
-        console.log({data});
         const updatedUsage = await this.repo.update(id, data);
         if (!updatedUsage) {
             throw new BadRequestError("Failed to update subscription usage");

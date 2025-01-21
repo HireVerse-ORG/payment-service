@@ -36,7 +36,7 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
         }
         const { jobPostLimit, profileAccessLimit, resumeAccessLimit } = this.generatePlanDetails(newPlan);
         const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobPostLimit, profileAccessLimit, resumeAccessLimit });
-
+        await this.usageService.resetUsage(userId);
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
         }
