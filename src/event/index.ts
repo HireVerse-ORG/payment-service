@@ -8,9 +8,9 @@ const eventController = container.get<EventController>(TYPES.EventController);
 
 export async function startEventService() {
     try {
+        await kafkaProducer.connect();
         await kafkaConsumer.connect();
         await eventController.initializeSubscriptions();
-        await kafkaProducer.connect();
         logger.info("Event service started successfully.");
     } catch (error) {
         logger.error("Error starting the event service:", error);
@@ -19,8 +19,8 @@ export async function startEventService() {
 
 export async function stopEventService() {
     try {
-        await kafkaConsumer.disconnect();
         await kafkaProducer.disconnect();
+        await kafkaConsumer.disconnect();
         logger.info("Event service stopped successfully.");
     } catch (error) {
         logger.error("Error stopping the event service:", error);

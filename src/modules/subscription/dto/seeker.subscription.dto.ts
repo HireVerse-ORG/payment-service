@@ -9,3 +9,7 @@ export interface SeekerSubscriptionPlanDTO {
     canMessageAllSeekers: boolean;  
     canMessageOnlySeekers: boolean; 
 }
+
+export interface UpdateSeekerSubscriptionUsageDTO {
+    jobApplicationsUsed?: number;
+}

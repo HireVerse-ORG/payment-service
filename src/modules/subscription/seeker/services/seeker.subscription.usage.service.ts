@@ -4,6 +4,7 @@ import { ISeekerSubscriptionUsageService } from "../interfaces/seeker.subscripti
 import containerTypes from "../../../../core/container/container.types";
 import { SeekerSubscriptionUsage } from "../models/seeker.subscription.usage.entity";
 import { BadRequestError, NotFoundError } from "@hireverse/service-common/dist/app.errors";
+import { UpdateSeekerSubscriptionUsageDTO } from "../../dto/seeker.subscription.dto";
 
 @injectable()
 export class SeekerSubscriptionUsageService implements ISeekerSubscriptionUsageService {
@@ -12,6 +13,14 @@ export class SeekerSubscriptionUsageService implements ISeekerSubscriptionUsageS
     async createUsage(userId: string): Promise<SeekerSubscriptionUsage> {
         const usage = await this.repo.create({userId});
         return usage;
+    }
+
+    async updateUsage(id: string, data: UpdateSeekerSubscriptionUsageDTO): Promise<SeekerSubscriptionUsage> {
+        const updatedUsage = await this.repo.update(id, data);
+        if (!updatedUsage) {
+            throw new BadRequestError("Failed to update subscription usage");
+        }
+        return updatedUsage;
     }
 
     async getUsageByUserId(userId: string): Promise<SeekerSubscriptionUsage | null> {

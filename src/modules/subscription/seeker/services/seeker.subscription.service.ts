@@ -110,7 +110,7 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         switch (plan) {
             case SubscriptionPlan.PREMIUM:
                 return {
-                    jobApplicationsPerMonth: 9999,
+                    jobApplicationsPerMonth: -1,
                     canMessageAllSeekers: true,
                     canMessageOnlySeekers: false,
                 };
