@@ -13,9 +13,9 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
 
     // Create a new subscription
     async createSubscription(userId: string, plan: CompanySubscriptionPlans, paymentIdentifier?: string): Promise<CompanySubscriptionPlan> {
-        const { jobPostLimit, profileAccessLimit, resumeAccessLimit } = this.generatePlanDetails(plan);
+        const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(plan);
         const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, 
-            jobPostLimit, profileAccessLimit, resumeAccessLimit});
+            jobPostLimit, applicantionAccessLimit});
         await this.usageService.createUsage(userId);
         return subscription;
     }
@@ -34,8 +34,8 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
         if (!subscription) {
             throw new NotFoundError(`Subscription not found`);
         }
-        const { jobPostLimit, profileAccessLimit, resumeAccessLimit } = this.generatePlanDetails(newPlan);
-        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobPostLimit, profileAccessLimit, resumeAccessLimit });
+        const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(newPlan);
+        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobPostLimit, applicantionAccessLimit });
         await this.usageService.resetUsage(userId);
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -54,10 +54,10 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
             throw new BadRequestError(`Subscription is already canceled or free`);
         }
 
-        const { jobPostLimit, profileAccessLimit, resumeAccessLimit } = this.generatePlanDetails(CompanySubscriptionPlans.FREE);
+        const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(CompanySubscriptionPlans.FREE);
         const updatedSubscription = await this.repo.update(subscription.id, {
             plan: CompanySubscriptionPlans.FREE,
-            jobPostLimit, profileAccessLimit, resumeAccessLimit
+            jobPostLimit, applicantionAccessLimit
         });
 
         if (!updatedSubscription) {
@@ -85,8 +85,8 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
             throw new NotFoundError(`Subscription not found`);
         }
 
-        const { jobPostLimit, profileAccessLimit, resumeAccessLimit } = this.generatePlanDetails(subscription.plan);
-        const renewedSubscription = await this.repo.update(subscription.id, { jobPostLimit, profileAccessLimit, resumeAccessLimit });
+        const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(subscription.plan);
+        const renewedSubscription = await this.repo.update(subscription.id, { jobPostLimit, applicantionAccessLimit });
 
         if (!renewedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -102,22 +102,19 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
             case CompanySubscriptionPlans.FREE:
                 return {
                     jobPostLimit: 1,
-                    resumeAccessLimit: 5,
-                    profileAccessLimit: 5,
+                    applicantionAccessLimit: 5,
                 };
 
             case CompanySubscriptionPlans.BASIC:
                 return {
                     jobPostLimit: 5,
-                    resumeAccessLimit: 20,
-                    profileAccessLimit: 20,
+                    applicantionAccessLimit: 20,
                 };
 
             case CompanySubscriptionPlans.PREMIUM:
                 return {
                     jobPostLimit: -1,
-                    resumeAccessLimit: -1,
-                    profileAccessLimit: -1,
+                    applicantionAccessLimit: -1,
                 };
 
             default:

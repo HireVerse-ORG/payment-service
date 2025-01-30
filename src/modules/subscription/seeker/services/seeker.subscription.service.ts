@@ -41,6 +41,8 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
         }
+
+        await this.usageService.resetUsage(userId);
         return this.toDTO(updatedSubscription);
     }
 

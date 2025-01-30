@@ -5,7 +5,11 @@ import { KafkaConsumer, KafkaProducer } from "@hireverse/kafka-communication/dis
 import { ICompanySubscriptionUsageService } from "../modules/subscription/company/interfaces/company.subscription.usage.service.interface";
 import { logger } from "../core/utils/logger";
 import { ICompanySubscriptionService } from "../modules/subscription/company/interfaces/company.subscription.service.interface";
-import { JobAppliedAccepted, JobAppliedMessage, JobAppliedRejected, JobStatusUpdatedEvent, JobValidationMessage } from "@hireverse/kafka-communication/dist/events";
+import { JobAppliedAccepted, JobAppliedMessage, JobApplicationViewedMessage,
+        JobAppliedRejected, JobValidationMessage, 
+        JobPostAcceptedEvent,
+        JobPostRejectedEvent,
+        JobApplicationViewUpdatedEvent} from "@hireverse/kafka-communication/dist/events";
 import { ISeekerSubscriptionUsageService } from "../modules/subscription/seeker/interfaces/seeker.subscription.usage.service.interface";
 import { ISeekerSubscriptionService } from "../modules/subscription/seeker/interfaces/seeker.subscription.service.interface";
 
@@ -23,7 +27,21 @@ export class EventController {
         await this.consumer.subscribeToTopics([
             { topic: KafkaTopics.JOB_APPLIED, handler: this.jobAppliedEventHandler },
             { topic: KafkaTopics.JOB_VALIDATION_REQUESTED, handler: this.jobPostedEventHandler },
+            { topic: KafkaTopics.JOB_APPLICATION_VIEWED, handler: this.jobApplicationViewedHandler },
         ])
+    }
+
+    private jobApplicationViewedHandler = async (message: JobApplicationViewedMessage) => {
+        const {job_application_id, viewer_user_id} = message;
+        try {
+            const updated = await this.companyUsageService.updateApplicationAccess(viewer_user_id, job_application_id);
+            if(updated){
+                const viewUpdatedEvent = JobApplicationViewUpdatedEvent({ key: message.job_application_id, value: message });
+                await this.producer.sendEvent(viewUpdatedEvent);
+            }
+        } catch (error) {
+            logger.error(`Failed to process message from ${KafkaTopics.JOB_APPLICATION_VIEWED}`);
+        }
     }
 
     private jobAppliedEventHandler = async (message: JobAppliedMessage) => {
@@ -77,27 +95,18 @@ export class EventController {
                         jobsPosted: jobpostCount,
                     });
 
-                    const jobStatusSuccessEvent = JobStatusUpdatedEvent({
+                    const jobPostAcceptedEvent = JobPostAcceptedEvent({
                         key: job_id,
-                        value: {
-                            job_id,
-                            status: "success",
-                            reason: null,
-                        },
-                    });
+                        value: message
+                    })
 
-                    await this.producer.sendEvent(jobStatusSuccessEvent);
+                    await this.producer.sendEvent(jobPostAcceptedEvent)
                 } else {
-                    const jobStatusFailureEvent = JobStatusUpdatedEvent({
+                    const jobRejectedEvent = JobPostRejectedEvent({
                         key: job_id,
-                        value: {
-                            job_id,
-                            status: "failed",
-                            reason: "Job post limit exceeded",
-                        },
-                    });
-
-                    await this.producer.sendEvent(jobStatusFailureEvent);
+                        value: {...message, reason: "Job post limit exceeded"}
+                    })
+                    await this.producer.sendEvent(jobRejectedEvent)
                 }
             }
         } catch (error: any) {
@@ -105,17 +114,6 @@ export class EventController {
                 error.message ||
                 `Failed to process message from ${KafkaTopics.JOB_VALIDATION_REQUESTED}:`
             );
-
-            const jobStatusErrorEvent = JobStatusUpdatedEvent({
-                key: message.job_id,
-                value: {
-                    job_id: message.job_id,
-                    status: "failed",
-                    reason: "Internal error occurred while processing validation",
-                },
-            });
-
-            await this.producer.sendEvent(jobStatusErrorEvent);
         }
     }
 

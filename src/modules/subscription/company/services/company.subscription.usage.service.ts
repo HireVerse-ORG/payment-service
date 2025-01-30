@@ -5,7 +5,6 @@ import { ICompanySubscriptionUsageRepository } from "../interfaces/company.subsc
 import { CompanySubscriptionUsage } from "../models/company.subscription.usage.entity";
 import { BadRequestError, NotFoundError } from "@hireverse/service-common/dist/app.errors";
 import { UpdateCompanySubscriptionUsageDTO } from "../../dto/company.subscription.dto";
-import { ICompanySubscriptionService } from "../interfaces/company.subscription.service.interface";
 
 @injectable()
 export class CompanySubscriptionUsageService implements ICompanySubscriptionUsageService {
@@ -37,13 +36,34 @@ export class CompanySubscriptionUsageService implements ICompanySubscriptionUsag
             throw new NotFoundError("Users usage not forund");
         }
 
-        const resetedUsage = await this.repo.update(usage.id, { jobsPosted: 0, profilesViewed: 0, resumesAccessed: 0 });
+        const resetedUsage = await this.repo.update(usage.id, { jobsPosted: 0, applicantionAccessed: 0, applicationIdsAccessed: null });
 
         if (!resetedUsage) {
             throw new BadRequestError("Failed to reset Usage");
         }
 
         return resetedUsage;
+    }
+
+    async updateApplicationAccess(userId: string, applicationId: string): Promise<boolean> {
+        const usage = await this.getUsageByUserId(userId);
+
+        if (!usage) {
+            throw new NotFoundError("Users usage not forund");
+        }
+
+        const {applicantionAccessed, applicationIdsAccessed} = usage;
+
+        if (applicationIdsAccessed && applicationIdsAccessed.includes(applicationId)) {
+            return false;    
+        }
+
+        
+        const ids = applicationIdsAccessed ? [...applicationIdsAccessed, applicationId] : [applicationId];
+        const count = applicantionAccessed + 1;
+        await this.repo.update(usage.id, {applicantionAccessed: count, applicationIdsAccessed: ids});
+
+        return true
     }
 
     async updateUsage(id: string, data: UpdateCompanySubscriptionUsageDTO): Promise<CompanySubscriptionUsage> {

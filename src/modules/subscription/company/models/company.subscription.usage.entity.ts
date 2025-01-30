@@ -21,13 +21,13 @@ export class CompanySubscriptionUsage {
         type: 'int',
         default: 0,
     })
-    resumesAccessed!: number;
+    applicantionAccessed!: number;
 
     @Column({
-        type: 'int',
-        default: 0,
+        type: 'json',
+        nullable: true,
     })
-    profilesViewed!: number; 
+    applicationIdsAccessed!: string[] | null;
 
     @Column({
         type: 'timestamp',

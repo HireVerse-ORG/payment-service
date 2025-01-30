@@ -9,7 +9,6 @@ export interface ICompanySubscriptionService {
     renewSubscription(userId: string): Promise<CompanySubscriptionPlan>;
     generatePlanDetails(plan: CompanySubscriptionPlans): {
         jobPostLimit: number;
-        resumeAccessLimit: number;
-        profileAccessLimit: number;
+        applicantionAccessLimit: number;
     };
 }

@@ -7,4 +7,5 @@ export interface ICompanySubscriptionUsageService {
     getUsageByUserId(userId: string): Promise<CompanySubscriptionUsage | null>;
     getOrCreateUsage(userId: string): Promise<CompanySubscriptionUsage>;
     resetUsage(userId: string): Promise<CompanySubscriptionUsage>;
+    updateApplicationAccess(userId: string, applicationId: string): Promise<boolean>
 }

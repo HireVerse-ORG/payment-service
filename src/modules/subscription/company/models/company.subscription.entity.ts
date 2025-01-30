@@ -40,11 +40,5 @@ export class CompanySubscriptionPlan {
         type: 'int',
         default: 5, 
     })
-    resumeAccessLimit!: number;
-
-    @Column({
-        type: 'int',
-        default: 5, 
-    })
-    profileAccessLimit!: number;
+    applicantionAccessLimit!: number;
 }
