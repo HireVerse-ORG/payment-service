@@ -40,11 +40,5 @@ export class SeekerSubscriptionPlan {
         type: 'boolean',
         default: false,
     })
-    canMessageAllSeekers!: boolean;  
-
-    @Column({
-        type: 'boolean',
-        default: false,
-    })
-    canMessageOnlySeekers!: boolean; 
+    canMessageAnyone!: boolean;  
 }

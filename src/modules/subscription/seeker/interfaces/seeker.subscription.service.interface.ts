@@ -11,7 +11,6 @@ export interface ISeekerSubscriptionService {
     renewSubscription(userId: string): Promise<SeekerSubscriptionPlanDTO>;
     generatePlanDetails(plan: SubscriptionPlan): {
         jobApplicationsPerMonth: number;
-        canMessageAllSeekers: boolean;
-        canMessageOnlySeekers: boolean;
+        canMessageAnyone: boolean;
     };
 }

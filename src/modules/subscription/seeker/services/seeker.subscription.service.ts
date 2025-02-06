@@ -15,8 +15,8 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
 
     // Create a new subscription
     async createSubscription(userId: string, plan: SubscriptionPlan, paymentIdentifier?: string): Promise<SeekerSubscriptionPlanDTO> {
-        const { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers } = this.generatePlanDetails(plan);
-        const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers });
+        const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(plan);
+        const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, jobApplicationsPerMonth, canMessageAnyone });
         await this.usageService.createUsage(userId);
         return this.toDTO(subscription);
     }
@@ -25,7 +25,7 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
     async getSubscriptionByUserId(userId: string): Promise<SeekerSubscriptionPlanDTO | null> {
         const subscription = await this.repo.findOne({
             where: { userId },
-          });
+        });
         return subscription ? this.toDTO(subscription) : null;
     }
 
@@ -35,8 +35,8 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         if (!subscription) {
             throw new NotFoundError(`Subscription not found`);
         }
-        const { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers } = this.generatePlanDetails(newPlan);
-        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers });
+        const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(newPlan);
+        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobApplicationsPerMonth, canMessageAnyone });
 
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -57,12 +57,11 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             throw new BadRequestError(`Subscription is already canceled or free`);
         }
 
-        const { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers } = this.generatePlanDetails(SubscriptionPlan.FREE);
+        const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(SubscriptionPlan.FREE);
         const updatedSubscription = await this.repo.update(subscription.id, {
             plan: SubscriptionPlan.FREE,
             jobApplicationsPerMonth,
-            canMessageAllSeekers,
-            canMessageOnlySeekers,
+            canMessageAnyone
         });
 
         if (!updatedSubscription) {
@@ -95,8 +94,8 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             throw new NotFoundError(`Subscription not found`);
         }
 
-        const { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers } = this.generatePlanDetails(subscription.plan);
-        const renewedSubscription = await this.repo.update(subscription.id, { jobApplicationsPerMonth, canMessageAllSeekers, canMessageOnlySeekers });
+        const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(subscription.plan);
+        const renewedSubscription = await this.repo.update(subscription.id, { jobApplicationsPerMonth, canMessageAnyone });
 
         if (!renewedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -113,21 +112,18 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             case SubscriptionPlan.PREMIUM:
                 return {
                     jobApplicationsPerMonth: -1,
-                    canMessageAllSeekers: true,
-                    canMessageOnlySeekers: false,
+                    canMessageAnyone: true,
                 };
             case SubscriptionPlan.BASIC:
                 return {
                     jobApplicationsPerMonth: 30,
-                    canMessageAllSeekers: true,
-                    canMessageOnlySeekers: false,
+                    canMessageAnyone: true,
                 };
             case SubscriptionPlan.FREE:
             default:
                 return {
                     jobApplicationsPerMonth: 5,
-                    canMessageAllSeekers: false,
-                    canMessageOnlySeekers: true,
+                    canMessageAnyone: false,
                 };
         }
     }
@@ -140,8 +136,7 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             plan: entity.plan,
             paymentIdentifier: entity.paymentIdentifier || null,
             jobApplicationsPerMonth: entity.jobApplicationsPerMonth,
-            canMessageAllSeekers: entity.canMessageAllSeekers,
-            canMessageOnlySeekers: entity.canMessageOnlySeekers,
+            canMessageAnyone: entity.canMessageAnyone,
         };
     }
 }

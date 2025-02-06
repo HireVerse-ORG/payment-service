@@ -6,8 +6,7 @@ export interface SeekerSubscriptionPlanDTO {
     plan: SubscriptionPlan;  
     paymentIdentifier?: string | null;  
     jobApplicationsPerMonth: number;  
-    canMessageAllSeekers: boolean;  
-    canMessageOnlySeekers: boolean; 
+    canMessageAnyone: boolean;  
 }
 
 export interface UpdateSeekerSubscriptionUsageDTO {

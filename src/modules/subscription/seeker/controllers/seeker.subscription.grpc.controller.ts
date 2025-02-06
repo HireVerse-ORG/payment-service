@@ -15,6 +15,7 @@ export class SeekerSubscriptionGrpcController extends BaseController {
     public getProcedures() {
         return {
             CreateFreePlan: this.createFreePlan.bind(this),
+            SeekerCanMessage: this.seekerCanMessage.bind(this),
         }
     }
 
@@ -24,5 +25,17 @@ export class SeekerSubscriptionGrpcController extends BaseController {
         await this.paymentService.subscribeToPlan(stripeCustomerId, STRIPE_SEEKER_SUBSCRIPTION_IDS[SubscriptionPlan.FREE]);
         await this.subscriptionService.createSubscription(userId, SubscriptionPlan.FREE, stripeCustomerId);
         callback(null, {message: "Free plan created"})
+    })
+
+    private seekerCanMessage = grpcWrapper(async (call: any, callback: any) => {        
+        let { userId } = call.request;
+        const subscription = await this.subscriptionService.getSubscriptionByUserId(userId);
+
+        if(!subscription){
+            callback({message: "Subscription not found"})
+        }
+
+        const canMessage = subscription?.canMessageAnyone;
+        callback(null, {canMessage})
     })
 }
