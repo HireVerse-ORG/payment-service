@@ -9,12 +9,15 @@ import { AuthRequest } from "@hireverse/service-common/dist/token/user/userReque
 import { Response } from "express";
 import { CompanySubscriptionPlans } from "../models/company.subscription.entity";
 import { STRIPE_COMPANY_SUBSCRIPTION_IDS } from "../../../../core/adapters/stripe";
+import { ITransactionService } from "../../../transaction/interfaces/transaction.service.interface";
+import { UserType } from "../../../transaction/transaction.entity";
 
 @injectable()
 export class CompanySubscriptionController extends BaseController {
     @inject(containerTypes.CompanySubscriptionService) subscriptionService!: ICompanySubscriptionService;
     @inject(containerTypes.CompanySubscriptionUsageService) private usageService!: ICompanySubscriptionUsageService;
     @inject(containerTypes.PaymentService) private paymentService!: IPaymentService;
+    @inject(containerTypes.TransactionService) private transactionService!: ITransactionService;
 
     /**
    * @route GET /api/payment/subscription/company/plan
@@ -71,17 +74,31 @@ export class CompanySubscriptionController extends BaseController {
             return res.status(400).json({ message: "Already Subscribed to this plan" });
         }
 
+        const PLAN_ID = STRIPE_COMPANY_SUBSCRIPTION_IDS[validPlan];
+
+        const planDetails = await this.paymentService.getPlanDetails(PLAN_ID);
+
+        const transaction = await this.transactionService.createTransaction({
+            amount: planDetails.amount,
+            userId,
+            userType: UserType.COMPANY,
+            currency: planDetails.currency,
+            paymentIdentifier: subscription.paymentIdentifier,
+            subscriptionId: subscription.id,
+        })
+
         const customerId = subscription.paymentIdentifier;
 
         const url = await this.paymentService.generatePaymentLink({
             customerId,
-            priceId: STRIPE_COMPANY_SUBSCRIPTION_IDS[validPlan],
+            priceId: PLAN_ID,
             successUrl,
             cancelUrl,
             metadata: {
                 userId,
                 plan_type: "company",
-                selected_plan: plan
+                selected_plan: plan,
+                transaction_id: transaction.id,
             },
         });
 

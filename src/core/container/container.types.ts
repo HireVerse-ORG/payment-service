@@ -29,8 +29,17 @@ export default {
     PaymentAdapter: Symbol('PaymentAdapter'),
     PaymentService: Symbol('PaymentService'),
 
+    // transactions
+    TransactionController: Symbol('TransactionController'),
+    TransactionGrpcController: Symbol('TransactionGrpcController'),
+    TransactionService: Symbol('TransactionService'),
+    TransactionRepository: Symbol('TransactionRepository'),
+
     // webhook
     WebhookController: Symbol('WebhookController'),
+
+    // external
+    ProfileService: Symbol('ProfileService'),
 
     // kafka
     KafkaProducer: Symbol('KafkaProducer'),

@@ -92,4 +92,18 @@ export class StripePaymentAdapter implements IPaymentAdapter {
             throw new InternalError("Failed to create payment link");
         }
     }
+
+    async getPlanDetails(planId: string): Promise<{ amount: number; currency: string; }> {
+        try {
+            const price = await stripe.prices.retrieve(planId);
+
+            const amount = price.unit_amount ? price.unit_amount / 100 : 0; 
+            const currency = price.currency;
+
+            return { amount, currency };
+        } catch (error) {
+            logger.error("Failed to retrieve plan details:", error);
+            throw new InternalError("Failed to retrieve plan details");
+        }
+    }
 }

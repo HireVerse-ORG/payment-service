@@ -3,13 +3,17 @@ import { loadSubscriptionContainer } from "../../modules/subscription/subscripti
 import { loadPaymentContainer } from "../../modules/payment/payment.module";
 import { loadWebhookContainer } from "../../modules/webhooks/webhook.module";
 import { loadEventContainer } from "../../event/event.container";
+import { loadTransactionContainer } from "../../modules/transaction/transaction.module";
+import { loadExternalContainer } from "../../modules/external/external.module";
 
 const container = new Container();
 
+loadExternalContainer(container)
 loadEventContainer(container)
 loadWebhookContainer(container);
 loadPaymentContainer(container)
-loadSubscriptionContainer(container)
+loadSubscriptionContainer(container);
+loadTransactionContainer(container);
 
 export { container };
 

@@ -5,4 +5,5 @@ export interface IPaymentService {
     subscribeToPlan(customerId: string, planId: string): Promise<string>;
     genratePlan(data: CreatePlanDTO): Promise<string>;
     generatePaymentLink(data: CreatePaymentLinkDTO): Promise<string>;
+    getPlanDetails(planId: string): Promise<{ amount: number; currency: string; }>
 }

@@ -3,11 +3,15 @@ import { inject, injectable } from "inversify";
 import { ISeekerSubscriptionService } from "../subscription/seeker/interfaces/seeker.subscription.service.interface";
 import containerTypes from "../../core/container/container.types";
 import { ICompanySubscriptionService } from "../subscription/company/interfaces/company.subscription.service.interface";
+import { ITransactionService } from "../transaction/interfaces/transaction.service.interface";
+import { TransactionStatus } from "../transaction/transaction.entity";
+import { logger } from "../../core/utils/logger";
 
 @injectable()
 export class WebhookController {
     @inject(containerTypes.SeekerSubscriptionService) private seekerSubscriptionService!: ISeekerSubscriptionService;
     @inject(containerTypes.CompanySubscriptionService) private companySubscriptionService!: ICompanySubscriptionService;
+    @inject(containerTypes.TransactionService) private transactionService!: ITransactionService;
 
     stripe = async (request: Request, response: Response) => {
         const event = request.body;
@@ -16,7 +20,7 @@ export class WebhookController {
             switch (event.type) {
                 case 'checkout.session.completed':
                     const session = event.data.object;
-                    const { userId, plan_type, selected_plan } = session.metadata
+                    const { userId, plan_type, selected_plan, transaction_id } = session.metadata
                     if (userId && plan_type === "seeker") {
                         try {
                             await this.seekerSubscriptionService.updateSubscriptionPlan(userId, selected_plan);
@@ -32,38 +36,72 @@ export class WebhookController {
                             // console.log(error);
                         }
                     }
+
+                    if (transaction_id) {
+                        await this.transactionService.updateTransactionStatus(transaction_id, TransactionStatus.COMPLETED);
+                    }
+
                     break;
 
                 case 'customer.subscription.updated':
                     const subscription = event.data.object;
                     const { userId: updatedUserId, plan_type: updatedPlanType } = subscription.metadata;
 
-                    if (updatedUserId && updatedPlanType === 'seeker') {
+                    if(subscription.status === 'active'){
+                        let subscriptionId, paymentIdentifier: string | undefined;
+
+                        if (updatedUserId && updatedPlanType === 'seeker') {
+                            try {
+                                const subscription = await this.seekerSubscriptionService.renewSubscription(updatedUserId);
+                                subscriptionId = subscription.id;
+                                if(subscription.paymentIdentifier){
+                                    paymentIdentifier = subscription.paymentIdentifier;
+                                }
+                            } catch (error) {
+                                // console.error("Error updating subscription data:", error);
+                            }
+                        }
+    
+                        if (updatedUserId && updatedPlanType === 'company') {
+                            try {
+                                const subscription = await this.companySubscriptionService.renewSubscription(updatedUserId);
+                                subscriptionId = subscription.id;
+                                if(subscription.paymentIdentifier){
+                                    paymentIdentifier = subscription.paymentIdentifier;
+                                }
+                            } catch (error) {
+                                // console.error("Error updating subscription data:", error);
+                            }
+                        }
+
+                        await this.transactionService.createTransaction({
+                            amount: 0,
+                            currency: "usd",
+                            paymentIdentifier,
+                            subscriptionId,                           
+                            userId: updatedUserId,
+                            userType: updatedPlanType,
+                            status: TransactionStatus.COMPLETED,
+                        })
+                    }
+                    break;
+
+                case "invoice.payment_failed":
+                case "payment_intent.payment_failed": {
+                    const obj = event.data.object;
+                    const transactionId = obj.metadata ? obj.metadata.transaction_id : null;
+                    if (transactionId) {
                         try {
-                            await this.seekerSubscriptionService.renewSubscription(updatedUserId);
+                            await this.transactionService.updateTransactionStatus(
+                                transactionId,
+                                TransactionStatus.FAILED
+                            );
                         } catch (error) {
-                            // console.error("Error updating subscription data:", error);
+                            logger.error("Failed to update transaction status to FAILED:", error);
                         }
                     }
-
-                    if (updatedUserId && updatedPlanType === 'company') {
-                        try {
-                            await this.companySubscriptionService.renewSubscription(updatedUserId);
-                        } catch (error) {
-                            // console.error("Error updating subscription data:", error);
-                        }
-                    }
                     break;
-
-                case "invoice.payment_succeeded":
-                    // console.log("Invoice payment succeeded!");
-                    // Process successful payment (e.g., grant subscription)
-                    break;
-
-                case "customer.subscription.deleted":
-                    // console.log("Subscription canceled!");
-                    // Process subscription cancellation (e.g., revoke access)
-                    break;
+                }
 
                 default:
             }

@@ -8,12 +8,15 @@ import { ISeekerSubscriptionUsageService } from "../interfaces/seeker.subscripti
 import { IPaymentService } from "../../../payment/interface/payment.service.interface";
 import { SubscriptionPlan } from "../models/seeker.subscription.entity";
 import { STRIPE_SEEKER_SUBSCRIPTION_IDS } from "../../../../core/adapters/stripe";
+import { ITransactionService } from "../../../transaction/interfaces/transaction.service.interface";
+import { UserType } from "../../../transaction/transaction.entity";
 
 @injectable()
 export class SeekerSubscriptionController {
     @inject(containerTypes.SeekerSubscriptionService) private subscriptionService!: ISeekerSubscriptionService;
     @inject(containerTypes.SeekerSubscriptionUsageService) private usageService!: ISeekerSubscriptionUsageService;
     @inject(containerTypes.PaymentService) private paymentService!: IPaymentService;
+    @inject(containerTypes.TransactionService) private transactionService!: ITransactionService;
 
     /**
    * @route GET /api/payment/subscription/seeker/plan
@@ -69,17 +72,31 @@ export class SeekerSubscriptionController {
             return res.status(400).json({ message: "Already Subscribed to this plan" });
         }
 
+        const PLAN_ID = STRIPE_SEEKER_SUBSCRIPTION_IDS[validPlan];
+
+        const planDetails = await this.paymentService.getPlanDetails(PLAN_ID);
+
+        const transaction = await this.transactionService.createTransaction({
+            amount: planDetails.amount,
+            userId,
+            userType: UserType.SEEKER,
+            currency: planDetails.currency,
+            paymentIdentifier: subscription.paymentIdentifier,
+            subscriptionId: subscription.id,
+        })
+
         const customerId = subscription.paymentIdentifier;
 
         const url = await this.paymentService.generatePaymentLink({
             customerId,
-            priceId: STRIPE_SEEKER_SUBSCRIPTION_IDS[validPlan],
+            priceId: PLAN_ID,
             successUrl,
             cancelUrl,
             metadata: {
                 userId,
                 plan_type: "seeker",
-                selected_plan: plan
+                selected_plan: plan,
+                transaction_id: transaction.id,
             },
         });
 

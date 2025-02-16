@@ -18,6 +18,10 @@ export class PaymentService implements IPaymentService {
         return subscriptionId;
     }
 
+    async getPlanDetails(planId: string): Promise<{ amount: number; currency: string; }> {
+        return await this.paymentAdapter.getPlanDetails(planId);
+    }
+
     async genratePlan(data: CreatePlanDTO): Promise<string> {
         const planId = await this.paymentAdapter.createPlan(data);
         return planId
