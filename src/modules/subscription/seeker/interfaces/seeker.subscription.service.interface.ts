@@ -13,4 +13,5 @@ export interface ISeekerSubscriptionService {
         jobApplicationsPerMonth: number;
         canMessageAnyone: boolean;
     };
+    getTotalSubscribers(): Promise<number>;
 }

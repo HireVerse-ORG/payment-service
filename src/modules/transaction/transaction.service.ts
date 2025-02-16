@@ -27,9 +27,7 @@ export class TransactionService implements ITransactionService {
     }
 
     async getMonthlyRecurringRevenue(): Promise<number> {
-        // const transactions = await this.repo.getCompletedTransactionsForMonth(new Date());
-        // return transactions.reduce((total, tx) => total + Number(tx.amount), 0);
-        return 1000
+       return await this.repo.getMRR();
     }
 
     async listTransactions(filter: { userId?: string; status?: TransactionStatus; page: number; limit: number; }): Promise<IPaginationResponse<Transaction>> {
@@ -39,5 +37,9 @@ export class TransactionService implements ITransactionService {
         if (status) whereClause.status = status;
         const transactions = await this.repo.paginate({where: {userId, status}}, page, limit);
         return transactions;
+    }
+
+    async getYearlyRevenueOverview(year: number): Promise<{ month: string; revenue: number; }[]> {
+        return await this.repo.getRevenueOverview(year);
     }
 }

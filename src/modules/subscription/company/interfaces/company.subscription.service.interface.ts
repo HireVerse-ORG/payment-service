@@ -11,4 +11,5 @@ export interface ICompanySubscriptionService {
         jobPostLimit: number;
         applicantionAccessLimit: number;
     };
+    getTotalSubscribers(): Promise<number>;
 }

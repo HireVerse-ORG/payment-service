@@ -97,6 +97,10 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
         return renewedSubscription;
     }
 
+    async getTotalSubscribers(): Promise<number> {
+        return await this.repo.countSubscriptions();
+    }
+
     generatePlanDetails(plan: CompanySubscriptionPlans) {
         switch (plan) {
             case CompanySubscriptionPlans.FREE:

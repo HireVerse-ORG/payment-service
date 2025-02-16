@@ -35,6 +35,9 @@ export default {
     TransactionService: Symbol('TransactionService'),
     TransactionRepository: Symbol('TransactionRepository'),
 
+    // statitics
+    StatisticsController: Symbol('StatisticsController'),
+
     // webhook
     WebhookController: Symbol('WebhookController'),
 

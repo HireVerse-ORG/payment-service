@@ -128,6 +128,10 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         }
     }
 
+    async getTotalSubscribers(): Promise<number> {
+        return await this.repo.countSubscriptions();
+    }
+
     // Helper to convert an entity to a DTO
     private toDTO(entity: SeekerSubscriptionPlan): SeekerSubscriptionPlanDTO {
         return {

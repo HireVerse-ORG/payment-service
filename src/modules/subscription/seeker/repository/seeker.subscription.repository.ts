@@ -3,7 +3,8 @@ import { ISeekerSubscriptionRepository } from "../interfaces/seeker.subscription
 import { PostgresBaseRepository } from "@hireverse/service-common/dist/repository";
 import { SeekerSubscriptionPlan } from "../models/seeker.subscription.entity";
 import { AppDataSource } from "../../../../core/database/postgress";
-import { FindOneOptions } from "typeorm";
+import { FindManyOptions, FindOneOptions } from "typeorm";
+import { InternalError } from "@hireverse/service-common/dist/app.errors";
 
 @injectable()
 export class SeekerSubscriptionRepository extends PostgresBaseRepository<SeekerSubscriptionPlan> implements ISeekerSubscriptionRepository{
@@ -15,5 +16,14 @@ export class SeekerSubscriptionRepository extends PostgresBaseRepository<SeekerS
 
     async findOneUpdated(filter?: FindOneOptions<SeekerSubscriptionPlan> | undefined): Promise<SeekerSubscriptionPlan | null> {
         return await this.repository.findOne(filter || {})
+    }
+
+    async countSubscriptions(options?: FindManyOptions<SeekerSubscriptionPlan>): Promise<number> {
+        try {
+            const count = await this.repository.count(options);
+            return count;
+        } catch (error) {
+            throw new InternalError("Failed to perform count operation");
+        }
     }
 }

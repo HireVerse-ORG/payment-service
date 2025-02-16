@@ -7,11 +7,12 @@ export interface ITransactionService {
     updateTransactionStatus(transactionId: string, status: TransactionStatus): Promise<void>;
     getTransactionById(transactionId: string): Promise<Transaction | null>;
     getTransactionsForUser(userId: string): Promise<Transaction[]>;
-    getMonthlyRecurringRevenue(): Promise<number>;
     listTransactions(filter: {
         userId?: string,
         status?: TransactionStatus,
         page: number,
         limit: number,
     }): Promise<IPaginationResponse<Transaction>>;
+    getMonthlyRecurringRevenue(): Promise<number>;
+    getYearlyRevenueOverview(year: number): Promise<{ month: string; revenue: number }[]>;
 }
