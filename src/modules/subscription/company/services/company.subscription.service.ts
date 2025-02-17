@@ -14,8 +14,13 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
     // Create a new subscription
     async createSubscription(userId: string, plan: CompanySubscriptionPlans, paymentIdentifier?: string): Promise<CompanySubscriptionPlan> {
         const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(plan);
+        const {startDate, endDate} = this.generatePlanDates();
+
         const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, 
-            jobPostLimit, applicantionAccessLimit});
+            jobPostLimit, applicantionAccessLimit,
+            startDate,
+            endDate,
+        });
         await this.usageService.createUsage(userId);
         return subscription;
     }
@@ -35,7 +40,12 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
             throw new NotFoundError(`Subscription not found`);
         }
         const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(newPlan);
-        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobPostLimit, applicantionAccessLimit });
+        const {startDate, endDate} = this.generatePlanDates();
+
+        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, 
+            jobPostLimit, applicantionAccessLimit,
+            startDate, endDate 
+        });
         await this.usageService.resetUsage(userId);
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -55,9 +65,12 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
         }
 
         const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(CompanySubscriptionPlans.FREE);
+        const {startDate, endDate} = this.generatePlanDates();
+
         const updatedSubscription = await this.repo.update(subscription.id, {
             plan: CompanySubscriptionPlans.FREE,
-            jobPostLimit, applicantionAccessLimit
+            jobPostLimit, applicantionAccessLimit,
+            startDate, endDate,
         });
 
         if (!updatedSubscription) {
@@ -86,7 +99,12 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
         }
 
         const { jobPostLimit, applicantionAccessLimit } = this.generatePlanDetails(subscription.plan);
-        const renewedSubscription = await this.repo.update(subscription.id, { jobPostLimit, applicantionAccessLimit });
+        const {startDate, endDate} = this.generatePlanDates();
+
+        const renewedSubscription = await this.repo.update(subscription.id, { 
+            jobPostLimit, applicantionAccessLimit,
+            startDate, endDate 
+        });
 
         if (!renewedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -99,6 +117,13 @@ export class CompanySubscriptionService implements ICompanySubscriptionService {
 
     async getTotalSubscribers(): Promise<number> {
         return await this.repo.countSubscriptions();
+    }
+
+    private generatePlanDates(): {startDate: Date; endDate: Date} {
+        return {
+            startDate: new Date(),
+            endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
+        }
     }
 
     generatePlanDetails(plan: CompanySubscriptionPlans) {

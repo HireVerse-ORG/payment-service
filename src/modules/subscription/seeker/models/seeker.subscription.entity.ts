@@ -8,37 +8,49 @@ export enum SubscriptionPlan {
 
 @Entity('seeker_subscription_plans')
 export class SeekerSubscriptionPlan {
-    @PrimaryGeneratedColumn('uuid')  
+    @PrimaryGeneratedColumn('uuid')
     id!: string;
 
     @Column({
         type: 'varchar',
-        length: 24,  
+        length: 24,
     })
-    userId!: string;  
+    userId!: string;
 
     @Column({
         type: 'enum',
         enum: SubscriptionPlan,
         default: SubscriptionPlan.FREE,
     })
-    plan!: SubscriptionPlan; 
+    plan!: SubscriptionPlan;
 
     @Column({
         type: 'varchar',
         nullable: true,
     })
-    paymentIdentifier?: string | null; 
+    paymentIdentifier?: string | null;
 
     @Column({
         type: 'int',
         default: 5,
     })
-    jobApplicationsPerMonth!: number;  
+    jobApplicationsPerMonth!: number;
 
     @Column({
         type: 'boolean',
         default: false,
     })
-    canMessageAnyone!: boolean;  
+    canMessageAnyone!: boolean;
+
+    @Column({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP',
+    })
+    startDate!: Date;
+
+    @Column({
+        type: 'timestamp',
+        nullable: true,
+    })
+    endDate?: Date;
 }

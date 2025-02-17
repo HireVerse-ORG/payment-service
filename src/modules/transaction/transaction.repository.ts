@@ -26,7 +26,7 @@ export class TransactionRepository extends PostgresBaseRepository<Transaction> i
                 .andWhere("EXTRACT(YEAR FROM transaction.createdAt) = :currentYear", { currentYear })
                 .getRawOne();
 
-            return result && result.mrr ? parseFloat(result.mrr) / 100 : 0;
+            return result && result.mrr ? result.mrr : 0;
 
         } catch (error) {
             throw new InternalError("Failer to perform mrr operation")
@@ -63,7 +63,7 @@ export class TransactionRepository extends PostgresBaseRepository<Transaction> i
                 const data = result.find((r: any) => parseInt(r.month, 10) === m.num);
                 return {
                     month: m.month,
-                    revenue: data && data.revenue ? parseFloat(data.revenue) / 100 : 0,
+                    revenue: data && data.revenue ? parseFloat(data.revenue) : 0,
                 };
             });
 

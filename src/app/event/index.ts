@@ -1,10 +1,12 @@
-import { container } from "../core/container";
-import TYPES from "../core/container/container.types";
-import { EventController } from "./event.controller";
-import { logger } from "../core/utils/logger";
-import { kafkaConsumer, kafkaProducer } from "./event.container";
+import { container } from "../../core/container";
+import TYPES from "../../core/container/container.types";
+import { EventController } from "../../modules/event/event.controller";
+import { logger } from "../../core/utils/logger";
+import { KafkaConsumer, KafkaProducer } from "@hireverse/kafka-communication/dist/kafka";
 
 const eventController = container.get<EventController>(TYPES.EventController);
+const kafkaConsumer = container.get<KafkaConsumer>(TYPES.KafkaConsumer);
+const kafkaProducer = container.get<KafkaProducer>(TYPES.KafkaProducer);
 
 export async function startEventService() {
     try {

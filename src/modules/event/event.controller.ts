@@ -1,17 +1,17 @@
 import { inject, injectable } from "inversify";
-import TYPES from "../core/container/container.types";
+import TYPES from "../../core/container/container.types";
 import { KafkaTopics } from "@hireverse/kafka-communication/dist/events/topics";
 import { KafkaConsumer, KafkaProducer } from "@hireverse/kafka-communication/dist/kafka";
-import { ICompanySubscriptionUsageService } from "../modules/subscription/company/interfaces/company.subscription.usage.service.interface";
-import { logger } from "../core/utils/logger";
-import { ICompanySubscriptionService } from "../modules/subscription/company/interfaces/company.subscription.service.interface";
+import { ICompanySubscriptionUsageService } from "../subscription/company/interfaces/company.subscription.usage.service.interface";
+import { logger } from "../../core/utils/logger";
+import { ICompanySubscriptionService } from "../subscription/company/interfaces/company.subscription.service.interface";
 import { JobAppliedAccepted, JobAppliedMessage, JobApplicationViewedMessage,
         JobAppliedRejected, JobValidationMessage, 
         JobPostAcceptedEvent,
         JobPostRejectedEvent,
         JobApplicationViewUpdatedEvent} from "@hireverse/kafka-communication/dist/events";
-import { ISeekerSubscriptionUsageService } from "../modules/subscription/seeker/interfaces/seeker.subscription.usage.service.interface";
-import { ISeekerSubscriptionService } from "../modules/subscription/seeker/interfaces/seeker.subscription.service.interface";
+import { ISeekerSubscriptionUsageService } from "../subscription/seeker/interfaces/seeker.subscription.usage.service.interface";
+import { ISeekerSubscriptionService } from "../subscription/seeker/interfaces/seeker.subscription.service.interface";
 
 @injectable()
 export class EventController {

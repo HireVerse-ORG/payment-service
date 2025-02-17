@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { loadSubscriptionContainer } from "../../modules/subscription/subscription.module";
 import { loadPaymentContainer } from "../../modules/payment/payment.module";
 import { loadWebhookContainer } from "../../modules/webhooks/webhook.module";
-import { loadEventContainer } from "../../event/event.container";
+import { loadEventContainer } from "../../modules/event/event.module";
 import { loadTransactionContainer } from "../../modules/transaction/transaction.module";
 import { loadExternalContainer } from "../../modules/external/external.module";
 import { loadStatisticsContainer } from "../../modules/statistics/statistics.module";

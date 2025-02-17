@@ -6,7 +6,7 @@ import ExpressServer from './app/express';
 import GrpcServer from './app/grpc';
 import { checkEnvVariables } from '@hireverse/service-common/dist/utils';
 import Database from './core/database';
-import { startEventService, stopEventService } from './event';
+import { startEventService, stopEventService } from './app/event';
 
 (async () => {
     checkEnvVariables('DATABASE_URL', 'KAFKA_SERVER', 'PROFILE_SERVICE_URL');

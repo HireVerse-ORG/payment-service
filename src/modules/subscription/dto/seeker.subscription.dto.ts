@@ -7,6 +7,8 @@ export interface SeekerSubscriptionPlanDTO {
     paymentIdentifier?: string | null;  
     jobApplicationsPerMonth: number;  
     canMessageAnyone: boolean;  
+    startDate: Date,
+    endDate?: Date
 }
 
 export interface UpdateSeekerSubscriptionUsageDTO {

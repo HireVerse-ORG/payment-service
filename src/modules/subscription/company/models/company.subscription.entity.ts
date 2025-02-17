@@ -41,4 +41,16 @@ export class CompanySubscriptionPlan {
         default: 5, 
     })
     applicantionAccessLimit!: number;
+
+    @Column({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP',
+    })
+    startDate!: Date;
+
+    @Column({
+        type: 'timestamp',
+        nullable: true,
+    })
+    endDate?: Date;
 }

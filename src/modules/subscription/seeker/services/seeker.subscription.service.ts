@@ -16,7 +16,13 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
     // Create a new subscription
     async createSubscription(userId: string, plan: SubscriptionPlan, paymentIdentifier?: string): Promise<SeekerSubscriptionPlanDTO> {
         const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(plan);
-        const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, jobApplicationsPerMonth, canMessageAnyone });
+        const {startDate, endDate} = this.generatePlanDates();
+
+        const subscription = await this.repo.create({ userId, plan, paymentIdentifier: paymentIdentifier ? paymentIdentifier : null, 
+            jobApplicationsPerMonth, canMessageAnyone,
+            startDate,
+            endDate,
+        });
         await this.usageService.createUsage(userId);
         return this.toDTO(subscription);
     }
@@ -26,6 +32,7 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         const subscription = await this.repo.findOne({
             where: { userId },
         });
+
         return subscription ? this.toDTO(subscription) : null;
     }
 
@@ -36,7 +43,13 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             throw new NotFoundError(`Subscription not found`);
         }
         const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(newPlan);
-        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, jobApplicationsPerMonth, canMessageAnyone });
+        const {startDate, endDate} = this.generatePlanDates();
+
+        const updatedSubscription = await this.repo.update(subscription.id, { plan: newPlan, 
+            jobApplicationsPerMonth, canMessageAnyone, 
+            startDate,
+            endDate
+        });
 
         if (!updatedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -58,10 +71,14 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         }
 
         const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(SubscriptionPlan.FREE);
+        const {startDate, endDate} = this.generatePlanDates();
+
         const updatedSubscription = await this.repo.update(subscription.id, {
             plan: SubscriptionPlan.FREE,
             jobApplicationsPerMonth,
-            canMessageAnyone
+            canMessageAnyone,
+            startDate,
+            endDate
         });
 
         if (!updatedSubscription) {
@@ -95,7 +112,13 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         }
 
         const { jobApplicationsPerMonth, canMessageAnyone } = this.generatePlanDetails(subscription.plan);
-        const renewedSubscription = await this.repo.update(subscription.id, { jobApplicationsPerMonth, canMessageAnyone });
+        const {startDate, endDate} = this.generatePlanDates();
+
+        const renewedSubscription = await this.repo.update(subscription.id, { 
+            jobApplicationsPerMonth, canMessageAnyone,
+            startDate,
+            endDate 
+        });
 
         if (!renewedSubscription) {
             throw new BadRequestError(`Failed to update subscription`);
@@ -104,6 +127,10 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         await this.usageService.resetUsage(userId);
 
         return this.toDTO(renewedSubscription);
+    }
+
+    async getTotalSubscribers(): Promise<number> {
+        return await this.repo.countSubscriptions();
     }
 
     // Helper to generate plan details
@@ -128,10 +155,12 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
         }
     }
 
-    async getTotalSubscribers(): Promise<number> {
-        return await this.repo.countSubscriptions();
+    private generatePlanDates(): {startDate: Date; endDate: Date} {
+        return {
+            startDate: new Date(),
+            endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
+        }
     }
-
     // Helper to convert an entity to a DTO
     private toDTO(entity: SeekerSubscriptionPlan): SeekerSubscriptionPlanDTO {
         return {
@@ -141,6 +170,8 @@ export class SeekerSubscriptionService implements ISeekerSubscriptionService {
             paymentIdentifier: entity.paymentIdentifier || null,
             jobApplicationsPerMonth: entity.jobApplicationsPerMonth,
             canMessageAnyone: entity.canMessageAnyone,
+            startDate: entity.startDate,
+            endDate: entity.endDate,
         };
     }
 }
