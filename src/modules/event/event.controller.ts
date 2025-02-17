@@ -5,13 +5,20 @@ import { KafkaConsumer, KafkaProducer } from "@hireverse/kafka-communication/dis
 import { ICompanySubscriptionUsageService } from "../subscription/company/interfaces/company.subscription.usage.service.interface";
 import { logger } from "../../core/utils/logger";
 import { ICompanySubscriptionService } from "../subscription/company/interfaces/company.subscription.service.interface";
-import { JobAppliedAccepted, JobAppliedMessage, JobApplicationViewedMessage,
-        JobAppliedRejected, JobValidationMessage, 
-        JobPostAcceptedEvent,
-        JobPostRejectedEvent,
-        JobApplicationViewUpdatedEvent} from "@hireverse/kafka-communication/dist/events";
+import {
+    JobAppliedAccepted, JobAppliedMessage, JobApplicationViewedMessage,
+    JobAppliedRejected, JobValidationMessage,
+    JobPostAcceptedEvent,
+    JobPostRejectedEvent,
+    JobApplicationViewUpdatedEvent,
+    UserCreatedMessage
+} from "@hireverse/kafka-communication/dist/events";
 import { ISeekerSubscriptionUsageService } from "../subscription/seeker/interfaces/seeker.subscription.usage.service.interface";
 import { ISeekerSubscriptionService } from "../subscription/seeker/interfaces/seeker.subscription.service.interface";
+import { IPaymentService } from "../payment/interface/payment.service.interface";
+import { STRIPE_COMPANY_SUBSCRIPTION_IDS, STRIPE_SEEKER_SUBSCRIPTION_IDS } from "../../core/adapters/stripe";
+import { SubscriptionPlan } from "../subscription/seeker/models/seeker.subscription.entity";
+import { CompanySubscriptionPlans } from "../subscription/company/models/company.subscription.entity";
 
 @injectable()
 export class EventController {
@@ -21,6 +28,7 @@ export class EventController {
     @inject(TYPES.CompanySubscriptionService) private companySubscriptionService!: ICompanySubscriptionService;
     @inject(TYPES.SeekerSubscriptionUsageService) private seekerUsageService!: ISeekerSubscriptionUsageService;
     @inject(TYPES.SeekerSubscriptionService) private seekerSubscriptionService!: ISeekerSubscriptionService;
+    @inject(TYPES.PaymentService) private paymentService!: IPaymentService;
 
 
     async initializeSubscriptions() {
@@ -28,14 +36,32 @@ export class EventController {
             { topic: KafkaTopics.JOB_APPLIED, handler: this.jobAppliedEventHandler },
             { topic: KafkaTopics.JOB_VALIDATION_REQUESTED, handler: this.jobPostedEventHandler },
             { topic: KafkaTopics.JOB_APPLICATION_VIEWED, handler: this.jobApplicationViewedHandler },
+            { topic: KafkaTopics.USER_CREATED, handler: this.userCreatedHandler },
         ])
     }
 
+    private userCreatedHandler = async (message: UserCreatedMessage) => {
+        const { userId, role, fullName, email } = message;
+        try {
+            if (role === "seeker") {
+                const stripeCustomerId = await this.paymentService.createCustomer(email, fullName);
+                await this.paymentService.subscribeToPlan(stripeCustomerId, STRIPE_SEEKER_SUBSCRIPTION_IDS[SubscriptionPlan.FREE]);
+                await this.seekerSubscriptionService.createSubscription(userId, SubscriptionPlan.FREE, stripeCustomerId);
+            } else if (role === "company") {
+                const stripeCustomerId = await this.paymentService.createCustomer(email, fullName);
+                await this.paymentService.subscribeToPlan(stripeCustomerId, STRIPE_COMPANY_SUBSCRIPTION_IDS[CompanySubscriptionPlans.FREE]);
+                await this.companySubscriptionService.createSubscription(userId, CompanySubscriptionPlans.FREE, stripeCustomerId);                
+            }
+        } catch (error) {
+            logger.error(`Failed to process message from ${KafkaTopics.FOLLOW_REQUESTED}`);
+        }
+    }
+
     private jobApplicationViewedHandler = async (message: JobApplicationViewedMessage) => {
-        const {job_application_id, viewer_user_id} = message;
+        const { job_application_id, viewer_user_id } = message;
         try {
             const updated = await this.companyUsageService.updateApplicationAccess(viewer_user_id, job_application_id);
-            if(updated){
+            if (updated) {
                 const viewUpdatedEvent = JobApplicationViewUpdatedEvent({ key: message.job_application_id, value: message });
                 await this.producer.sendEvent(viewUpdatedEvent);
             }
@@ -104,7 +130,7 @@ export class EventController {
                 } else {
                     const jobRejectedEvent = JobPostRejectedEvent({
                         key: job_id,
-                        value: {...message, reason: "Job post limit exceeded"}
+                        value: { ...message, reason: "Job post limit exceeded" }
                     })
                     await this.producer.sendEvent(jobRejectedEvent)
                 }
