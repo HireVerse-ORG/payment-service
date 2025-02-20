@@ -29,8 +29,8 @@ class Server {
         this.app.tryShutdown(err => {
             if (err) {
                 logger.error('Error during shutdown:', err);
+                process.exit(1);
             }
-            process.exit(0);
         });
     }
 }

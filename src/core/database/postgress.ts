@@ -6,7 +6,9 @@ export const AppDataSource = new DataSource({
     url: process.env.DATABASE_URL,
     synchronize: process.env.NODE_ENV === "development",
     // logging: true,
-    entities: ["src/**/*.entity.ts"],
+    entities: process.env.NODE_ENV === "production"
+    ? ["dist/**/*.entity.js"]
+    : ["src/**/*.entity.ts"],
     migrations: [],
     subscribers: [],
 });
@@ -14,7 +16,6 @@ export const AppDataSource = new DataSource({
 export const connectDb = async () => {
     try {
         await AppDataSource.initialize();
-        
         logger.info(`Database connected to: ${process.env.DATABASE_URL}`);
     } catch (error) {
         logger.error(`Error connecting to database: ${error}`);
