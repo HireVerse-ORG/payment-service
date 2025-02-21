@@ -55,11 +55,10 @@ export class Transaction {
     paymentIdentifier?: string;
 
     @Column({
-        type: 'varchar',
-        length: 50,
+        type: 'json',
         nullable: true,
     })
-    subscriptionId?: string;
+    metadata?: Record<string, any>;
 
     @Column({
         type: 'enum',

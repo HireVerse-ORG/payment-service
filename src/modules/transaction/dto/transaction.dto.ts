@@ -6,6 +6,6 @@ export interface CreateTransactionDto {
     amount: number;
     currency?: string;
     paymentIdentifier?: string;
-    subscriptionId?: string;
     status?: TransactionStatus;
+    metadata?: Record<string, any>;
 }

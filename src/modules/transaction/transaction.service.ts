@@ -15,27 +15,38 @@ export class TransactionService implements ITransactionService {
     }
 
     async updateTransactionStatus(transactionId: string, status: TransactionStatus): Promise<void> {
-        await this.repo.update(transactionId, {status});
+        await this.repo.update(transactionId, { status });
     }
 
     async getTransactionById(transactionId: string): Promise<Transaction | null> {
-        return await this.repo.findOne({where: {id: transactionId}});
+        return await this.repo.findOne({ where: { id: transactionId } });
     }
 
     async getTransactionsForUser(userId: string): Promise<Transaction[]> {
-        return await this.repo.findAll({where: {userId}});
+        return await this.repo.findAll({
+            where: { userId },
+            order: {
+                createdAt: 'DESC'
+            }
+        });
     }
 
     async getMonthlyRecurringRevenue(): Promise<number> {
-       return await this.repo.getMRR();
+        return await this.repo.getMRR();
     }
 
     async listTransactions(filter: { userId?: string; status?: TransactionStatus; page: number; limit: number; }): Promise<IPaginationResponse<Transaction>> {
-        const {userId, status, page, limit} = filter;
+        const { userId, status, page, limit } = filter;
         const whereClause: any = {};
         if (userId) whereClause.userId = userId;
         if (status) whereClause.status = status;
-        const transactions = await this.repo.paginate({where: {userId, status}}, page, limit);
+        const transactions = await this.repo.customPaginate(page, limit, {
+            where: whereClause,
+            order: {
+                createdAt: 'DESC'
+            }
+        });
+
         return transactions;
     }
 

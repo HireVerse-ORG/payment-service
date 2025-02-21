@@ -82,7 +82,15 @@ export class SeekerSubscriptionController {
             userType: UserType.SEEKER,
             currency: planDetails.currency,
             paymentIdentifier: subscription.paymentIdentifier,
-            subscriptionId: subscription.id,
+            metadata: {
+                plan_type: "seeker",
+                subscription_details: {
+                    plan: validPlan,
+                    plan_id: PLAN_ID,
+                    id: subscription.id,
+                    ...this.subscriptionService.generatePlanDetails(validPlan),
+                }
+            }
         })
 
         const customerId = subscription.paymentIdentifier;

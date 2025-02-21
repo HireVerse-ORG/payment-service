@@ -74,15 +74,23 @@ export class WebhookController {
                             }
                         }
 
-                        await this.transactionService.createTransaction({
-                            amount: 0,
-                            currency: "usd",
-                            paymentIdentifier,
-                            subscriptionId,                           
-                            userId: updatedUserId,
-                            userType: updatedPlanType,
-                            status: TransactionStatus.COMPLETED,
-                        })
+                        if(updatedUserId){
+                            await this.transactionService.createTransaction({
+                                amount: 0,
+                                currency: "usd",
+                                paymentIdentifier,                     
+                                userId: updatedUserId,
+                                userType: updatedPlanType,
+                                status: TransactionStatus.COMPLETED,
+                                metadata: {
+                                    subscription_details: {
+                                        id: subscriptionId,
+                                        plan_type: updatedPlanType,
+                                    }
+                                }
+                            })
+                        }
+
                     }
                     break;
 

@@ -84,7 +84,15 @@ export class CompanySubscriptionController extends BaseController {
             userType: UserType.COMPANY,
             currency: planDetails.currency,
             paymentIdentifier: subscription.paymentIdentifier,
-            subscriptionId: subscription.id,
+            metadata: {
+                plan_type: "company",
+                subscription_details: {
+                    plan: validPlan,
+                    plan_id: PLAN_ID,
+                    id: subscription.id,
+                    ...this.subscriptionService.generatePlanDetails(validPlan),
+                }
+            }
         })
 
         const customerId = subscription.paymentIdentifier;

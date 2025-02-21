@@ -9,6 +9,7 @@ const controlller = container.get<TransactionController>(TYPES.TransactionContro
 // base: /api/payment/transactions
 const router = Router();
 
+router.get('/', allowedRoles('seeker', 'company'), controlller.myTransactions);
 router.get('/list', allowedRoles('admin'), controlller.listTransactions);
 
 export const transactionRoutes = router;

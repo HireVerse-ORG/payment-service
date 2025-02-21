@@ -1,9 +1,10 @@
 import { injectable } from "inversify";
-import { PostgresBaseRepository } from "@hireverse/service-common/dist/repository";
+import { IPaginationResponse, PostgresBaseRepository } from "@hireverse/service-common/dist/repository";
 import { ITransactionRepository } from "./interfaces/transaction.repository.interface";
 import { AppDataSource } from "../../core/database/postgress";
 import { Transaction, TransactionStatus } from "./transaction.entity";
 import { InternalError } from "@hireverse/service-common/dist/app.errors";
+import { FindManyOptions } from "typeorm";
 
 @injectable()
 export class TransactionRepository extends PostgresBaseRepository<Transaction> implements ITransactionRepository {
@@ -12,6 +13,29 @@ export class TransactionRepository extends PostgresBaseRepository<Transaction> i
         const repository = AppDataSource.getRepository(Transaction);
         super(repository)
     }
+
+    async customPaginate(
+        page: number,
+        limit: number,
+        filter?: FindManyOptions<Transaction>
+    ): Promise<IPaginationResponse<Transaction>> {
+        const [data, total] = await this.repository.findAndCount({
+            ...filter,
+            take: limit,
+            skip: (page - 1) * limit,
+        });
+    
+        return {
+            data,
+            currentPage: page,
+            limit,
+            hasPreviousPage: page > 1,
+            hasNextPage: page * limit < total,
+            total,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
+    
 
     async getMRR(): Promise<number> {
         const currentMonth = new Date().getMonth() + 1;

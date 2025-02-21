@@ -13,6 +13,26 @@ export class TransactionController {
     @inject(TYPES.ProfileService) private ProfileService!: IProfileService;
 
     /**
+    * @route GET /api/payment/transactions
+    * @scope Seeker or Company
+    **/
+    public myTransactions = asyncWrapper(async (req: AuthRequest, res: Response) => {
+        const userId = req.payload?.userId!;
+        const page = parseInt(req.query.page as string, 10) || 1;
+        const limit = parseInt(req.query.limit as string, 10) || 10;
+        const status = req.query.status as TransactionStatus || undefined;
+
+        const transactions = await this.transactionService.listTransactions({
+            userId,
+            status,
+            page,
+            limit
+        })
+
+        return res.json(transactions);
+    });
+
+    /**
    * @route GET /api/payment/transactions/list
    * @scope Admin
    **/
