@@ -22,11 +22,11 @@ const kafkaConnect = new KafkaConnect({
 })
 
 export const kafkaProducer = new kafka.KafkaProducer(kafkaConnect, { 
-    allowAutoTopicCreation: true,
+    allowAutoTopicCreation: process.env.KAFKA_AUTO_CREATE_TOPICS === "true",
 });
 export const kafkaConsumer = new kafka.KafkaConsumer(kafkaConnect, { 
         groupId: "payment-group", 
-        allowAutoTopicCreation: true,
+        allowAutoTopicCreation: process.env.KAFKA_AUTO_CREATE_TOPICS === "true",
     });
 
 export function loadEventContainer(container: Container) {
