@@ -12,7 +12,7 @@ export function registerRoutes(app: Application, prefix = "/api/payment") {
     app.use(`${prefix}/subscription`, subscriptionRoutes);
     app.use(`${prefix}/transactions`, transactionRoutes);
     app.use(`${prefix}/statistics`, statisticsRoutes);
-    app.use('/webhook', webhookRoutes);
+    app.use(`${prefix}/webhook`, webhookRoutes);
     app.use(notFoundHandler);
     app.use(errorHandler);
 }

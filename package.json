@@ -6,7 +6,7 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "dev": "nodemon src/server.ts",
-    "stripe:listen": "stripe listen --forward-to http://localhost:5005/webhook"
+    "stripe:listen": "stripe listen --forward-to http://localhost:5005/api/payment/webhook"
   },
   "keywords": [],
   "author": "",
